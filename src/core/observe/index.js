@@ -16,7 +16,7 @@ function defineReactive(data, key, val) {
                 return
             }
             val = newVal
-            // 触发依赖
+            // 触发依赖 为何在 val = newVal 下面，当getter时，收集到旧值，当触发set后，也是通过getter获取新值
             dep.notify()
         }
     })
