@@ -66,6 +66,8 @@ export class Observer {
             const augment = hasProto ? protoAugment : copyAugment
             // value.__proto__ = arrayMethods 因为有的浏览器不支持__proto__
             augment(value, arrayMethods, arrayKeys)
+            this.observeArray(value) //侦测数组的每一项
+
         } else {
             this.walk(value)
         }
@@ -81,6 +83,13 @@ export class Observer {
             defineReactive(obj, keys[i], obj[keys[i]])
         }
     }
+    //侦测数组的每一项
+    observeArray(list) {
+        for (let i = 0; i < list.length; i++) {
+            observer(list[i]);
+        }
+    }
+
 }
 
 function protoAugment(target, src, arrayKeys) {
