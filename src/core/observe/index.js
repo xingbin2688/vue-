@@ -1,19 +1,25 @@
-import { def } from '../../utils'
+import { def, hasOwn, isObject } from '../../utils'
 import { arrayMethods } from './array'
 import Dep from './dep'
 
 // Object.defineProperty可以侦测到对象的变化
 // 每当从get的key中读取数据时，get函数便会被触发；每当往data的key中设置数据时，set函数触发
-function defineReactive(data, key, val) {
-    if (typeof val === 'object') {
-        new Observer(val)
-    }
+export function defineReactive(data, key, val) {
+    // if (typeof val === 'object') {
+    //     new Observer(val)  val是对象时，递归侦测
+    // }
+    let childOb = observer(val) // childOb是val的Observer的实例
     let dep = new Dep // 依赖
     Object.defineProperty(data, key, {
         enumerable: true, // 可枚举
         configurable: true, //  表示可通过delete删除从而重新定义属性
         get: function () {
             dep.depend() // 收集依赖
+            // 这里收集Array的依赖  obj.list=[1,2] 也会触发getter,Array在getter中收集依赖，在拦截器中触发依赖
+            if (childOb) {
+                // val是对象或者数组，会返回一个Observer的实例，这时收集它对应的依赖
+                childOb.dep.depend()
+            }
             return val
         },
         set: function (newVal) {
@@ -27,6 +33,23 @@ function defineReactive(data, key, val) {
     })
 }
 
+/**
+ * 为value创建一个Observer实例，如果已经创建，则直接返回Observer实例，避免重复侦测
+ */
+export function observer(value, asRootData) {
+    if (!isObject(value)) {
+        return
+    }
+    let ob
+    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+        // 代表value有Observer实例
+        ob = value.__ob__
+    } else {
+        ob = new Observer(value)
+    }
+    return ob
+}
+
 // __proto__是否可用
 const hasProto = '__proto__' in {}
 // 获取arrayMethods的key,包括不可枚举的
@@ -37,6 +60,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 export class Observer {
     constructor(value) {
         this.value = value
+        this.dep = new Dep(); // 新增Dep,只有在这里，数组的getter和拦截器才都能访问到，getter可以访问Observer实例，拦截器也可以
         if (Array.isArray(value)) {
             const augment = hasProto ? protoAugment : copyAugment
             // value.__proto__ = arrayMethods 因为有的浏览器不支持__proto__

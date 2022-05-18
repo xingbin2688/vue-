@@ -25,3 +25,12 @@ export function def(obj, key, val, enumerable) {
 
     })
 }
+
+export function isObject(val) {
+    return typeof val === 'object'
+}
+
+// 判断对象是否有key这个值
+export function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key)
+}
