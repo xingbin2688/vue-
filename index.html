@@ -9,4 +9,16 @@
 <body>
     
 </body>
+<script type="module">
+    import {Observer} from '/src/core/observe/index.js'
+    let obj = {
+        a:1,
+        b:2,
+        c:3,
+        d:[123],
+        e:{test:'test'}
+    }
+    new Observer(obj)
+    console.log(obj)
+</script>
 </html>

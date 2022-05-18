@@ -1,6 +1,6 @@
-import { def, hasOwn, isObject } from '../../utils'
-import { arrayMethods } from './array'
-import Dep from './dep'
+import { def, hasOwn, isObject } from '../../utils/index.js'
+import { arrayMethods } from './array.js'
+import Dep from './dep.js'
 
 // Object.defineProperty可以侦测到对象的变化
 // 每当从get的key中读取数据时，get函数便会被触发；每当往data的key中设置数据时，set函数触发

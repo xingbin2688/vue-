@@ -1,5 +1,5 @@
-const arrayProto = Array.prototype
-export const arrayMethods = Object.create(arrayProto)
+const arrayProto = Array.prototype;
+export const arrayMethods = Object.create(arrayProto);
 ['push', 'pop', 'unshift', 'shift', 'splice', 'sort', 'reverse'].forEach(method => {
     const original = arrayMethods[method] // 缓存原始方法
     Object.defineProperty(arrayMethods, method, {
