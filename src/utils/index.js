@@ -14,3 +14,14 @@ export function parsePath(path) {
         return obj
     }
 }
+
+// 给一个对象定义一个不可枚举的key:val
+export function def(obj, key, val, enumerable) {
+    Object.defineProperty(obj, key, {
+        value: val,
+        enumerable: !!enumerable,
+        writable: true,
+        configurable: true
+
+    })
+}

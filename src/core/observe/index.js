@@ -1,3 +1,5 @@
+import { def } from '../../utils'
+import { arrayMethods } from './array'
 import Dep from './dep'
 
 // Object.defineProperty可以侦测到对象的变化
@@ -25,11 +27,21 @@ function defineReactive(data, key, val) {
     })
 }
 
+// __proto__是否可用
+const hasProto = '__proto__' in {}
+// 获取arrayMethods的key,包括不可枚举的
+const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+
+
 // 递归侦测 所有key
 export class Observer {
     constructor(value) {
         this.value = value
-        if (!Array.isArray(value)) {
+        if (Array.isArray(value)) {
+            const augment = hasProto ? protoAugment : copyAugment
+            // value.__proto__ = arrayMethods 因为有的浏览器不支持__proto__
+            augment(value, arrayMethods, arrayKeys)
+        } else {
             this.walk(value)
         }
     }
@@ -43,5 +55,15 @@ export class Observer {
         for (let i = 0; i < keys.length; i++) {
             defineReactive(obj, keys[i], obj[keys[i]])
         }
+    }
+}
+
+function protoAugment(target, src, arrayKeys) {
+    target.__proto__ = src
+}
+function copyAugment(target, src, keys) {
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        def(target, key, src[key])
     }
 }
