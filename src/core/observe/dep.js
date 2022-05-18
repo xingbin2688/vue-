@@ -1,7 +1,9 @@
 // Dep类 管理依赖  收集依赖，触发依赖，删除依赖
+let uid = 0
 export default class Dep {
     constructor() {
         this.subs = []
+        this.id = uid++ // 创建dep Id
     }
     // 添加依赖
     addSub(sub) {
@@ -10,7 +12,8 @@ export default class Dep {
 
     depend() {
         if (window.target) {
-            this.addSub(window.target)
+            // 调用watch的方法，实现watcher 和 dep 互相订阅
+            window.target.addDep(this)
         }
     }
     // 触发依赖

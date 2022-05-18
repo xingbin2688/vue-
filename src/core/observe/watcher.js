@@ -4,11 +4,51 @@
    // 做点什么
    })
 */
+/**
+ * watch用法
+ * var unwatch = vm.$watch('a',unction (newVal, oldVal) {
+   // 做点什么
+   },{
+       deep: true,
+       immediate: true
+   })
+
+   Vue.prototype.$watch = function (expOrFn,cb,options) {
+       const vm = this
+       options = options || {}
+       const watcher = new Watcher(vm,expOrFn,cb,options)
+       if(options.immediate) {
+           cb.call(vm,watcher.value)
+       }
+       return function unwatcher() {
+           watcher.trardown()
+       }
+   }
+*/
+/**
+ * watch和dep是多对多的关系
+ * this.$watch(
+ * function() {
+ *  return this.age+this.name
+ * },
+ * function(newValue,oldValue) {
+ *  console.log(newValue,oldValue)
+ * })
+ * this.age+this.name 触发age和name的getter，然后watchrer订阅二者的dep
+*/
 import parsePath from '../../utils/index'
 export default class Watcher {
     constructor(vm, expOrFn, cb) {
         this.vm = vm
-        this.getter = parsePath(expOrFn) // this.getter是一个获取this.vm下的值的函数 如：获取this.vm.a.b.c的值的函数
+        // 记录订阅了哪些dep，当取消监听时，告诉这些dep，删除这些watch
+        this.deps = []
+        this.depIds = new Set()
+        if (typeof expOrFn === 'function') {
+            this.getter = expOrFn
+        } else {
+            this.getter = parsePath(expOrFn) // this.getter是一个获取this.vm下的值的函数 如：获取this.vm.a.b.c的值的函数
+        }
+
         this.cb = cb
         this.value = this.get()
     }
@@ -25,4 +65,24 @@ export default class Watcher {
         this.value = this.get()
         this.cb.call(this.vm, this.value, oldValue)
     }
+
+
+    // 记录dep,并通知dep存取watcher实例,只有第一次触发getter时才会收集依赖
+    addDep(dep) {
+        const id = dep.id
+        if (!this.depIds.has(id)) {
+            this.depIds.add(id)
+            this.deps.push(dep)
+            dep.addSub(this)
+        }
+    }
+
+    // 取消监听，从所有依赖项将自己移除
+    trardown() {
+        let i = this.deps.length
+        while (i--) {
+            this.deps[i].removeSub(this)
+        }
+    }
 }
+
