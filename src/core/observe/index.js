@@ -61,6 +61,7 @@ export class Observer {
     constructor(value) {
         this.value = value
         this.dep = new Dep(); // 新增Dep,只有在这里，数组的getter和拦截器才都能访问到，getter可以访问Observer实例，拦截器也可以
+        def(this.value, '__ob__', this) // 将Observer实例，赋值到value.__ob__ 就能在拦截器上拿到value.__ob__.dep依赖，标记是响应式数据
         if (Array.isArray(value)) {
             const augment = hasProto ? protoAugment : copyAugment
             // value.__proto__ = arrayMethods 因为有的浏览器不支持__proto__

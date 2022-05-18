@@ -5,6 +5,8 @@ export const arrayMethods = Object.create(arrayProto)
     Object.defineProperty(arrayMethods, method, {
         value: function mutator(...args) {
             // this指向arrayMethods，arrayMethods是实例的原型，this相当于实例
+            const ob = this.__ob__ // 获取Observer实例
+            ob.dep.notify()
             return original.apply(this, args)
         },
         enumerable: false,
