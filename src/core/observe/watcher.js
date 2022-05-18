@@ -36,10 +36,17 @@
  * })
  * this.age+this.name 触发age和name的getter，然后watchrer订阅二者的dep
 */
-import parsePath from '../../utils/index'
+import { parsePath } from '../../utils/index.js'
+import { traverse } from './traverse.js'
 export default class Watcher {
-    constructor(vm, expOrFn, cb) {
+    constructor(vm, expOrFn, cb, options) {
         this.vm = vm
+        // deep处理，就是让expOrFn对应的下面的值都触发getter，来订阅这个watcher
+        if (options) {
+            this.deep = !!options.deep
+        } else {
+            this.deep = false
+        }
         // 记录订阅了哪些dep，当取消监听时，告诉这些dep，删除这些watch
         this.deps = []
         this.depIds = new Set()
@@ -56,6 +63,9 @@ export default class Watcher {
     get() {
         window.target = this
         let value = this.getter.call(this.vm, this.vm) // 此时会触发this.vm.a.b.c的getter,收集依赖，并且this.value 会保存当前值
+        if (this.deep) {
+            traverse(value)
+        }
         window.target = undefined
         return value
     }
