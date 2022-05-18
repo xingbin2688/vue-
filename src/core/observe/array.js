@@ -6,6 +6,22 @@ export const arrayMethods = Object.create(arrayProto)
         value: function mutator(...args) {
             // this指向arrayMethods，arrayMethods是实例的原型，this相当于实例
             const ob = this.__ob__ // 获取Observer实例
+            let inserted
+            // 这几个是对数组的添加元素,对添加元素进行侦测
+            switch (method) {
+                case 'push':
+                case 'unshift':
+                    inserted = args
+                    break;
+                case 'splice':
+                    inserted = args.slice(2)
+                    break;
+                default:
+                    break;
+            }
+            if (inserted) {
+                ob.observeArray(inserted)
+            }
             ob.dep.notify()
             return original.apply(this, args)
         },
