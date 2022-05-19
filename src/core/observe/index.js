@@ -136,3 +136,29 @@ export function set(target, key, val) {
     ob.dep.notify()
     return val
 }
+
+/**
+ * vm.$delete(target,key)
+*/
+export function del(target, key) {
+    // 处理数组的情况
+    if (Array.isArray(target) && isValidArrayIndex(key)) {
+        // 替换位置，因为调用了splice，拦截器会触发更新依赖，并处理成响应式
+        target.splice(key, 1)
+        return val
+    }
+    const ob = target.__ob__
+    if (target._isVue || (ob && ob.vmCount)) {
+        process.env.NODE_ENV !== 'production' && console.warn('target不能是VUE.js实例或者VUE.js实例的根数据对象')
+    }
+    // key不是这个对象上的
+    if (!hasOwn(target, key)) {
+        return
+    }
+    delete target[key]
+    // 对象不是响应式，直接返回
+    if (!ob) {
+        return
+    }
+    ob.dep.notify()
+}
