@@ -34,3 +34,9 @@ export function isObject(val) {
 export function hasOwn(obj, key) {
     return Object.prototype.hasOwnProperty.call(obj, key)
 }
+
+// 判断是不是数组的有效值
+export function isValidArrayIndex(val) {
+    const n = parseFloat(String(val))
+    return n >= 0 && Math.floor(n) === n && isFinite(val)
+}

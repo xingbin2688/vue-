@@ -1,4 +1,4 @@
-import { def, hasOwn, isObject } from '../../utils/index.js'
+import { def, hasOwn, isObject, isValidArrayIndex } from '../../utils/index.js'
 import { arrayMethods } from './array.js'
 import Dep from './dep.js'
 
@@ -100,4 +100,39 @@ function copyAugment(target, src, keys) {
         const key = keys[i];
         def(target, key, src[key])
     }
+}
+
+/**
+ * vm.$set(target,key,value)
+*/
+export function set(target, key, val) {
+    // 处理数组的情况
+    if (Array.isArray(target) && isValidArrayIndex(key)) {
+        // 设置数组的length
+        target.length = Math.max(target.length, key)
+        // 替换位置，因为调用了splice，拦截器会触发更新依赖，并处理成响应式
+        target.splice(key, 1, val)
+        return val
+    }
+
+    // key已经存在target中,key已经是响应式，直接修改，触发setter,向依赖发送通知
+    if (key in target && !(key in Object.prototype)) {
+        target[key] = val
+        return val
+    }
+
+    // 处理新增的key
+    const ob = target.__ob__
+    if (target._isVue || (ob && ob.vmCount)) {
+        process.env.NODE_ENV !== 'production' && console.warn('target不能是VUE.js实例或者VUE.js实例的根数据对象')
+    }
+    // 对象不是响应式，直接赋值并返回
+    if (!ob) {
+        target[key] = val
+        return val
+    }
+    // 设置成响应式，并触发依赖，返回值
+    defineReactive(target, key, val)
+    ob.dep.notify()
+    return val
 }
