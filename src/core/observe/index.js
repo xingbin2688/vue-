@@ -9,7 +9,7 @@ export function defineReactive(data, key, val) {
     //     new Observer(val)  val是对象时，递归侦测
     // }
     let childOb = observer(val) // childOb是val的Observer的实例
-    let dep = new Dep // 依赖
+    let dep = new Dep() // 依赖
     Object.defineProperty(data, key, {
         enumerable: true, // 可枚举
         configurable: true, //  表示可通过delete删除从而重新定义属性
