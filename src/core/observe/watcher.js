@@ -40,6 +40,9 @@ import { parsePath } from '../../utils/index.js'
 import { traverse } from './traverse.js'
 export default class Watcher {
     constructor(vm, expOrFn, cb, options) {
+        // 每当创建watch实例时，都将watch实例添加到vm._watchers中
+        vm._watchers.push(this)
+
         this.vm = vm
         // deep处理，就是让expOrFn对应的下面的值都触发getter，来订阅这个watcher
         if (options) {

@@ -30,7 +30,7 @@ export default class Dep {
     }
 }
 
-function remove(arr, item) {
+export function remove(arr, item) {
     if (arr.length) {
         const index = arr.indexOf(item)
         if (index > -1) {
