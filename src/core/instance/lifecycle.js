@@ -55,3 +55,26 @@ export function lifecycleMixin(Vue) {
         vm.$off()
     }
 }
+
+
+export function initLifecycle(vm) {
+    const options = vm.$options
+
+    // 找出第一个非抽象类父类
+    let parent = options.parent
+    if(parent && !options.abstract) {
+        while (parent.$options.abstract && parent.$parent) {
+            parent = parent.$parent
+        }
+        parent.$parent.push(vm)
+    }
+
+    vm.$parent = parent
+    vm.$root = parent ? parent.$root : vm
+    vm.$children = []
+    vm.$refs = {}
+
+    vm._watcher = null
+    vm._isDestroyed = false
+    vm._isBeingDestroyed = false
+}
