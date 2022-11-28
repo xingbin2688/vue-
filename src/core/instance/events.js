@@ -95,3 +95,65 @@ export function eventsMixin(Vue) {
         return vm
     }
 }
+
+// 初始化事件 是指将父组件在模板中使用的v-on注册的事件添加到子组件的事件系统
+export function initEvents(vm) {
+    vm._events = Object.create(null)
+    // 初始化父组件附加的事件
+    const listeners = vm.$options._parentListeners
+    if (listeners) {
+        updateComponentListeners(vm, listeners)
+    }
+}
+
+let target
+
+
+// add remove 添加和移除事件
+function add(event, fn, once) {
+    if (once) {
+        target.$once(event, fn)
+    } else {
+        target.$on(event, fn)
+    }
+}
+
+function remove(event, fn) {
+    target.$off(event, fn)
+}
+
+export function updateComponentListeners(vm, listeners, oldListeners) {
+    target = vm
+    // 对比listeners oldListeners的不同，并调用add,remove进行事件的操作
+    updateComponentListeners(listeners, oldListeners || {}, add, remove, vm)
+}
+
+export function updateComponentListeners(on, oldOn, add, remove, vm) {
+    let name, cur, old, event
+    for (name in on) {
+        cur = on[name]
+        old = oldOn[name]
+        // 解析修饰符的 例如 v-on:increment.once  {~increment:function(){}}
+        event = normalizeEvent(name)
+        if (isUndef(cur)) {
+            process.env.NODE_ENV !== 'production' && console.warn(
+                `Invalid handler for event "${event.name}":got` + String(cur),
+                vm
+            )
+        } else if (isUndef(old)) {
+            if (isUndef(cur.fns)) {
+                cur = on[name] = createFnInvokere(cur)
+            }
+            add(event.name, cur, event.once, event.capture, event.passive)
+        } else if (cur !== old) {
+            old.fns = cur
+            on[name] = old
+        }
+    }
+    for (name in oldOn) {
+        if (isUndef(on[name])) {
+            event = normalizeEvent(name)
+            remove(event.name, oldOn[name], event.capture)
+        }
+    }
+}

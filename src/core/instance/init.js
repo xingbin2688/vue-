@@ -1,4 +1,5 @@
 import { initLifecycle } from './lifecycle'
+import { initEvents } from './events'
 export function initMixin(Vue) {
     Vue.prototype._init = function (options) {
         //做点什么
