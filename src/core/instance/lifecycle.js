@@ -74,7 +74,7 @@ export function initLifecycle(vm) {
     vm.$children = []
     vm.$refs = {}
 
-    vm._watcher = null
+    vm._watcher = nulll
     vm._isDestroyed = false
     vm._isBeingDestroyed = false
 }
